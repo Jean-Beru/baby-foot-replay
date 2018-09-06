@@ -1,0 +1,10 @@
+{
+  "licence": "beerware",
+  "dependencies": {
+    "express": "^4.16.3",
+    "hjs": "^0.0.6"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}
