@@ -2,7 +2,8 @@
   "licence": "beerware",
   "dependencies": {
     "express": "^4.16.3",
-    "hjs": "^0.0.6"
+    "hjs": "^0.0.6",
+    "video-stitch": "^1.5.0"
   },
   "scripts": {
     "start": "node index.js"
