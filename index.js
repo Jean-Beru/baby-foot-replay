@@ -5,7 +5,7 @@ const fs = require('fs');
 
 const SCHEME = 'http';
 const HOST = 'localhost';
-const PORT = 1664;
+const PORT = 80;
 const DEBUG = process.NODE_ENV !== 'prod';
 
 // Server
