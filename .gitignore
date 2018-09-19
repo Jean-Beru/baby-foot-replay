@@ -60,6 +60,9 @@ typings/
 # next.js build output
 .next
 
+# Docker
+docker-compose.override.yaml
+
 # App folders
 public/video/live/*
 public/video/replay/*
