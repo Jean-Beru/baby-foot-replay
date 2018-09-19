@@ -29,7 +29,7 @@ NodeJS >= 10
 
 Run `yarn install`.
 
-###Start application
+### Start application
 
 Run `yarn start`.
 
