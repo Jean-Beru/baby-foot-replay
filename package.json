@@ -6,6 +6,9 @@
     "video-stitch": "^1.5.0"
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "nodemon index.js"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.4"
   }
 }
