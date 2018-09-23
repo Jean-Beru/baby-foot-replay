@@ -4,5 +4,7 @@ services:
   web:
     build:
       context: ./.docker
+    environment:
+      NODE_ENV: dev
     volumes:
       - .:/app

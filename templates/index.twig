@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{ title }}</title>
+        <link rel="stylesheet" href="/assets/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="/assets/css/app.css" />
+        <script src="/assets/js/bootstrap.min.js"></script>
+    </head>
+    <body>
+        <header>
+            <h1>
+                Derniers ralentis
+                <button type="button" class="btn btn-info">Y'a litige !</button>
+            </h1>
+        </header>
+
+        <div class="container-fluid">
+            <div class="row">
+                {% for replay in replays %}
+                    <div class="col-3">
+                        <div class="save">
+                            <div class="corner"></div>
+                            <div class="label">
+                                {{ replay.recordedAt|date('d M Y') }}<br />
+                                {{ replay.recordedAt|date('H:i') }}
+                            </div>
+                        </div>
+                    </div>
+                {%  endfor %}
+            </div>
+        </div>
+    </body>
+</html>
