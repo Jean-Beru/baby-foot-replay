@@ -11,11 +11,21 @@ const DEBUG = process.NODE_ENV !== 'prod';
 // Server
 const app = express();
 app.set('views', __dirname + '/templates');
-app.set('view engine', 'hjs');
+app.set('view engine', 'twig');
 
 // Homepage
 app.get('/', function(req, res) {
-  res.render('index', { title: 'Baby-foot replay', message: 'Welcome !' });
+  res.render('index', {
+    title: 'Baby-foot replay',
+    replays: [
+      { file: '/replay/xxx.mp4', recordedAt: new Date('2018-06-30 16:30:00') },
+      { file: '/replay/xxx.mp4', recordedAt: new Date('2018-06-30 16:30:00') },
+      { file: '/replay/xxx.mp4', recordedAt: new Date('2018-06-30 16:30:00') },
+      { file: '/replay/xxx.mp4', recordedAt: new Date('2018-06-30 16:30:00') },
+      { file: '/replay/xxx.mp4', recordedAt: new Date('2018-06-30 16:30:00') },
+      { file: '/replay/xxx.mp4', recordedAt: new Date('2018-06-30 16:30:00') },
+    ],
+  });
 });
 
 // Replay

@@ -1,0 +1,50 @@
+body {
+    background-image: url('/assets/images/background.jpg');
+    background-size: cover;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background: #2f2f2f;
+    height: 60px;
+    line-height: 60px;
+    position: fixed;
+    top: 0;
+    text-align: center;
+    width: 100%;
+    z-index: 300;
+}
+header h1 {
+    color: #eeeeee;
+    font-variant: small-caps;
+    padding: 8px 0;
+}
+
+
+.container-fluid {
+    padding-top: 80px;
+    z-index: 200;
+}
+.container-fluid .save {
+    background-image: url('/assets/images/replay.jpg');
+    background-size: cover;
+    margin-bottom: 20px;
+    padding-bottom: 75%; /* 4:3 ratio */
+}
+.container-fluid .save .corner {
+    border-style: solid;
+    border-width: 100px 200px 0 0;
+    border-color: #8cd350 transparent transparent transparent;
+    height: 0;
+    position: absolute;
+    width: 0;
+    top: 0;
+}
+.container-fluid .save .label {
+    color: #eeeeee;
+    font-weight: bold;
+    padding: 1em;
+    position: absolute;
+    top: 0;
+}
