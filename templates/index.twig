@@ -4,13 +4,14 @@
         <title>{{ title }}</title>
         <link rel="stylesheet" href="/assets/css/bootstrap.min.css" />
         <link rel="stylesheet" href="/assets/css/app.css" />
+        <script src="/assets/js/jquery-3.3.1.min.js"></script>
         <script src="/assets/js/bootstrap.min.js"></script>
     </head>
     <body>
         <header>
             <h1>
                 Derniers ralentis
-                <button type="button" class="btn btn-info">Y'a litige !</button>
+                <button type="button" class="btn btn-info" data-toggle="modal" data-target="#replayModal" data-backdrop="static">Y'a litige !</button>
             </h1>
         </header>
 
@@ -26,8 +27,37 @@
                             </div>
                         </div>
                     </div>
-                {%  endfor %}
+                {% endfor %}
             </div>
+
+            <div class="modal fade" id="replayModal" tabindex="-1" role="dialog" aria-labelledby="replayModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-body text-center">
+                            <video id="player" controls autoplay></video>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                            <button type="button" class="btn btn-primary">Sauvergarder</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                $(function() {
+                    $('#replayModal').on('show.bs.modal', function () {
+                        $.get('/replay/5').done(function(result) {
+                            $('#player').html($('<source/>', {
+                                src: result,
+                                type: 'video/mp4'
+                            })).get(0).load();
+                        });
+                    }).on('hide.bs.modal', function() {
+                        $('#player').get(0).pause();
+                    });
+                });
+            </script>
         </div>
     </body>
 </html>
