@@ -48,3 +48,8 @@ header h1 {
     position: absolute;
     top: 0;
 }
+
+.modal-dialog {
+    max-width: inherit;
+    max-height: 90vh;
+}
