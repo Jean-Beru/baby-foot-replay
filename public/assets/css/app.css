@@ -51,5 +51,8 @@ header h1 {
 
 .modal-dialog {
     max-width: inherit;
-    max-height: 90vh;
+}
+
+.modal-dialog .plyr video {
+    width: auto;
 }
