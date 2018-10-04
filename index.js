@@ -3,6 +3,8 @@ const serveStatic = require('serve-static');
 const videoStitch = require('video-stitch');
 const fs = require('fs');
 const bodyParser = require('body-parser');
+const http = require('http');
+const stream = require('./src/stream');
 
 const SCHEME = 'http';
 const HOST = 'localhost';
@@ -12,6 +14,7 @@ const PUBLIC_FOLDER = __dirname + '/public';
 const LIVE_FOLDER = '/video/live';
 const REPLAY_FOLDER = '/video/replay';
 const SAVE_FOLDER = '/video/save';
+const ASSETS_FOLDER = '/assets';
 
 // Server
 const app = express();
@@ -59,6 +62,7 @@ app.get('/replay/:last', function(req, res) {
   ;
 });
 
+// Save
 app.post('/save', function(req, res) {
     const filename = req.body.file.split('/').pop();
 
@@ -76,7 +80,33 @@ app.post('/save', function(req, res) {
 // Public
 app.use(serveStatic(PUBLIC_FOLDER));
 
-// Start
-app.listen(PORT);
+// Assets
+app.use(ASSETS_FOLDER+'/bootstrap', express.static(__dirname + '/node_modules/bootstrap/dist/'));
+app.use(ASSETS_FOLDER+'/jquery', express.static(__dirname + '/node_modules/jquery/dist/'));
+app.use(ASSETS_FOLDER+'/plyr', express.static(__dirname + '/node_modules/plyr/dist/'));
+app.use(ASSETS_FOLDER+'/socket.io', express.static(__dirname + '/node_modules/socket.io-client/dist/'));
 
+// Start server
+const server = http.createServer(app).listen(PORT);
 console.log(`Server started on ${SCHEME}://${HOST}:${PORT}`);
+
+// Start stream
+const io = require('socket.io')(server);
+
+let connectedUsers = 0;
+io.on('connection', function(socket) {
+  console.log('Incoming connection');
+
+  connectedUsers++;
+
+  stream.start();
+
+  socket.on('disconnect', function () {
+    console.log('Connection lost');
+    connectedUsers--;
+
+    if (connectedUsers <= 0) {
+      stream.stop();
+    }
+  });
+});
