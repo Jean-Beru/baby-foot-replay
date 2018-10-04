@@ -2,36 +2,41 @@ const express = require('express');
 const serveStatic = require('serve-static');
 const videoStitch = require('video-stitch');
 const fs = require('fs');
+const bodyParser = require('body-parser');
 
 const SCHEME = 'http';
 const HOST = 'localhost';
 const PORT = 80;
 const DEBUG = process.NODE_ENV !== 'prod';
+const PUBLIC_FOLDER = __dirname + '/public';
+const LIVE_FOLDER = '/video/live';
+const REPLAY_FOLDER = '/video/replay';
+const SAVE_FOLDER = '/video/save';
 
 // Server
 const app = express();
 app.set('views', __dirname + '/templates');
 app.set('view engine', 'twig');
+app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
 // Homepage
 app.get('/', function(req, res) {
-  res.render('index', {
-    title: 'Baby-foot replay',
-    replays: [
-      { file: '/replay/xxx.mp4', recordedAt: new Date('2018-06-30 16:30:00') },
-      { file: '/replay/xxx.mp4', recordedAt: new Date('2018-06-30 16:30:00') },
-      { file: '/replay/xxx.mp4', recordedAt: new Date('2018-06-30 16:30:00') },
-      { file: '/replay/xxx.mp4', recordedAt: new Date('2018-06-30 16:30:00') },
-      { file: '/replay/xxx.mp4', recordedAt: new Date('2018-06-30 16:30:00') },
-      { file: '/replay/xxx.mp4', recordedAt: new Date('2018-06-30 16:30:00') },
-    ],
-  });
+    fs.readdir(PUBLIC_FOLDER + SAVE_FOLDER, function(err, files) {
+        res.render('index', {
+            title: 'Baby-foot replay',
+            replays: files.filter(function (file) {
+                return file.match(/.*\.mp4/ig);
+            }).map(function(file) {
+                return {file: 'video/save/' + file, recordedAt: file.split('.').slice(0, -1).join('.') / 1000};
+            }),
+        });
+    });
 });
 
 // Replay
 app.get('/replay/:last', function(req, res) {
   const last = req.params.last;
-  const videos = fs.readdirSync(__dirname + '/public/video/live');
+  const videos = fs.readdirSync(PUBLIC_FOLDER + LIVE_FOLDER);
   const filename = 'video/replay/'+(new Date()).getTime()+'.mp4';
 
   videoStitch
@@ -43,10 +48,10 @@ app.get('/replay/:last', function(req, res) {
       videos
         .slice(videos.length - last)
         .map(function(file) {
-          return { fileName: `${__dirname}/public/video/live/${file}` };
+          return { fileName: `${PUBLIC_FOLDER + LIVE_FOLDER}/${file}` };
         })
     )
-    .output(__dirname+'/public/'+filename)
+    .output(PUBLIC_FOLDER + '/' + filename)
     .concat()
     .then(function() {
       res.send(filename);
@@ -54,8 +59,22 @@ app.get('/replay/:last', function(req, res) {
   ;
 });
 
+app.post('/save', function(req, res) {
+    const filename = req.body.file.split('/').pop();
+
+    fs.copyFile(`${PUBLIC_FOLDER + REPLAY_FOLDER}/${filename}`, `${PUBLIC_FOLDER + SAVE_FOLDER}/${filename}`, function(error) {
+        if (error) {
+            res.status(500).json({error});
+
+            return;
+        }
+
+        res.status(204).json();
+    });
+});
+
 // Public
-app.use(serveStatic(__dirname + '/public/'));
+app.use(serveStatic(PUBLIC_FOLDER));
 
 // Start
 app.listen(PORT);

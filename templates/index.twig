@@ -36,11 +36,11 @@
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-body text-center">
-                            <video id="player" height="100%" controls autoplay></video>
+                            <video id="player" height="100%" controls></video>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
-                            <button type="button" class="btn btn-primary">Sauvergarder</button>
+                            <button type="button" id="save-replay" class="btn btn-primary">Sauvergarder</button>
                         </div>
                     </div>
                 </div>
@@ -51,6 +51,26 @@
                     const player = new Plyr('#player', {
                         keyboard: { focused: true, global: true },
                         seekTime: .1,
+                    });
+
+                    $('#save-replay').on('click', function () {
+                        $.post({
+                            url: '/save',
+                            dataType: 'json',
+                            data: {
+                                file: player.source
+                            }
+                        }).done(function () {
+                            $('#replayModal').find('.modal-body').prepend($('<div/>', {
+                                'class': 'alert alert-success',
+                                text: 'Replay sauvegardé !',
+                            }));
+                        }).fail(function (jqXHR) {
+                            $('#replayModal').find('.modal-body').prepend($('<div/>', {
+                                'class': 'alert alert-danger',
+                                text: jqXHR.responseJSON.error,
+                            }));
+                        });
                     });
 
                     $('#replayModal').on('show.bs.modal', function () {
@@ -66,6 +86,7 @@
                         });
                     }).on('hide.bs.modal', function() {
                         player.stop();
+                        $(this).find('.alert').remove();
                     });
                 });
             </script>
