@@ -66,3 +66,8 @@ docker-compose.override.yaml
 # App folders
 public/video/live/*
 public/video/replay/*
+public/video/save/*
+
+!public/video/live/.gitignore
+!public/video/replay/.gitignore
+!public/video/save/.gitignore
