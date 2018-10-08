@@ -99,7 +99,7 @@ io.on('connection', function(socket) {
 
   connectedUsers++;
 
-  stream.start();
+  stream.start(PUBLIC_FOLDER + LIVE_FOLDER + '/%d.h264');
 
   socket.on('disconnect', function () {
     console.log('Connection lost');
