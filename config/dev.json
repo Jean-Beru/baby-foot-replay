@@ -1,0 +1,16 @@
+{
+  "server": {
+    "port": 80,
+    "debug": true
+  },
+  "folder": {
+    "public": "/public",
+    "live": "/video/live",
+    "replay": "/video/replay",
+    "save": "/video/save",
+    "assets": "/assets"
+  },
+  "stream": {
+    "module": "dummy"
+  }
+}

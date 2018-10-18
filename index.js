@@ -3,17 +3,16 @@ const serveStatic = require('serve-static');
 const fs = require('fs');
 const bodyParser = require('body-parser');
 const http = require('http');
-const stream = require('./src/stream');
 const execSync = require('child_process').execSync;
+const Stream = require('./src/stream');
+const config = require('./config');
 
-const SCHEME = 'http';
-const HOST = 'localhost';
-const PORT = 8080;
-const PUBLIC_FOLDER = __dirname + '/public';
-const LIVE_FOLDER = '/video/live';
-const REPLAY_FOLDER = '/video/replay';
-const SAVE_FOLDER = '/video/save';
-const ASSETS_FOLDER = '/assets';
+// Const
+const FOLDER_PUBLIC = __dirname + config.folder.public;
+const FOLDER_LIVE = FOLDER_PUBLIC + config.folder.live;
+const FOLDER_REPLAY = FOLDER_PUBLIC + config.folder.replay;
+const FOLDER_SAVE = FOLDER_PUBLIC + config.folder.save;
+const FOLDER_ASSETS = config.folder.assets;
 
 // Server
 const app = express();
@@ -23,7 +22,7 @@ app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x
 
 // Homepage
 app.get('/', function(req, res) {
-    fs.readdir(PUBLIC_FOLDER + SAVE_FOLDER, function(err, files) {
+    fs.readdir(FOLDER_SAVE, function(err, files) {
         res.render('index', {
             title: 'Baby-foot replay',
             replays: files.filter(function (file) {
@@ -38,7 +37,7 @@ app.get('/', function(req, res) {
 // Replay
 app.get('/replay/:last', function(req, res) {
   const last = req.params.last;
-  const videos = fs.readdirSync(PUBLIC_FOLDER + LIVE_FOLDER).filter(function (file) {
+  const videos = fs.readdirSync(FOLDER_LIVE).filter(function (file) {
       return file.match(/.*\.h264/ig);
   });
   const outputFile = 'video/replay/'+(new Date()).getTime()+'.mp4';
@@ -47,9 +46,9 @@ app.get('/replay/:last', function(req, res) {
     const command = 'MP4Box -add '+videos
       .slice(videos.length - last)
       .map(function(file) {
-        return `${PUBLIC_FOLDER + LIVE_FOLDER}/${file}`;
+        return `${FOLDER_LIVE}/${file}`;
       })
-      .join(' -cat ')+' '+PUBLIC_FOLDER+'/'+outputFile;
+      .join(' -cat ')+' '+FOLDER_PUBLIC+'/'+outputFile;
     execSync(command);
 
     res.send(outputFile);
@@ -62,7 +61,7 @@ app.get('/replay/:last', function(req, res) {
 app.post('/save', function(req, res) {
     const filename = req.body.file.split('/').pop();
 
-    fs.copyFile(`${PUBLIC_FOLDER + REPLAY_FOLDER}/${filename}`, `${PUBLIC_FOLDER + SAVE_FOLDER}/${filename}`, function(error) {
+    fs.copyFile(`${FOLDER_REPLAY}/${filename}`, `${FOLDER_SAVE}/${filename}`, function(error) {
         if (error) {
             res.status(500).json({error});
 
@@ -74,28 +73,31 @@ app.post('/save', function(req, res) {
 });
 
 // Public
-app.use(serveStatic(PUBLIC_FOLDER));
+app.use(serveStatic(FOLDER_PUBLIC));
 
 // Assets
-app.use(ASSETS_FOLDER+'/bootstrap', express.static(__dirname + '/node_modules/bootstrap/dist/'));
-app.use(ASSETS_FOLDER+'/jquery', express.static(__dirname + '/node_modules/jquery/dist/'));
-app.use(ASSETS_FOLDER+'/plyr', express.static(__dirname + '/node_modules/plyr/dist/'));
-app.use(ASSETS_FOLDER+'/socket.io', express.static(__dirname + '/node_modules/socket.io-client/dist/'));
+app.use(FOLDER_ASSETS+'/bootstrap', express.static(__dirname + '/node_modules/bootstrap/dist/'));
+app.use(FOLDER_ASSETS+'/jquery', express.static(__dirname + '/node_modules/jquery/dist/'));
+app.use(FOLDER_ASSETS+'/plyr', express.static(__dirname + '/node_modules/plyr/dist/'));
+app.use(FOLDER_ASSETS+'/socket.io', express.static(__dirname + '/node_modules/socket.io-client/dist/'));
 
 // Start server
-const server = http.createServer(app).listen(PORT);
-console.log(`Server started on ${SCHEME}://${HOST}:${PORT}`);
+const server = http.createServer(app).listen(config.server.port);
+console.log(`Server started on port ${config.server.port}`);
 
 // Start stream
 const io = require('socket.io')(server);
 
+
+const stream = new Stream(config.stream);
 let connectedUsers = 0;
+
 io.on('connection', function(socket) {
   console.log('Incoming connection');
 
-  connectedUsers++;
+  stream.start();
 
-  stream.start(PUBLIC_FOLDER + LIVE_FOLDER + '/%d.h264');
+  connectedUsers++;
 
   socket.on('disconnect', function () {
     console.log('Connection lost');

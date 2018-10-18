@@ -1,0 +1,27 @@
+{
+  "server": {
+    "port": 8080,
+    "debug": false
+  },
+  "folder": {
+    "public": "public/",
+    "live": "video/live/",
+    "replay": "video/replay/",
+    "save": "video/save/",
+    "assets": "assets/"
+  },
+  "stream": {
+    "module": "raspivid",
+    "options": {
+      "--width": 1280,
+      "--height": 720,
+      "--fps": 90,
+      "--segment": 5000,
+      "--wrap": 5,
+      "--timeout": 0
+    },
+    "arguments": [
+      "public/video/live/%d.h264"
+    ]
+  }
+}
