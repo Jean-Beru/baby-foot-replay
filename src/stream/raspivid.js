@@ -2,12 +2,18 @@ const spawn = require('child_process').spawn;
 
 let streamProcess;
 
-function start(filename) {
+function start(options = {}, arguments = []) {
   if (streamProcess) {
     return;
   }
 
-  streamProcess = spawn('raspivid', ['--segment', 5000, '--wrap', 5, '-t', 0, '-o', filename]);
+  const params = [];
+
+  for (var key in options) {
+    params.push(key+' '+options[key]);
+  }
+
+  streamProcess = spawn('raspivid', params.concat(arguments));
 }
 
 function stop() {

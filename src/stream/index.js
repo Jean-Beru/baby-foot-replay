@@ -1,3 +1,6 @@
-const stream = process.env.NODE_ENV === 'dev' ? require('./dummy') : require('./raspivid');
+module.exports = function Stream(config) {
+  const module = require('./'+config.module);
 
-module.exports = stream;
+  this.start = function() { return module.start(config.options, config.arguments); };
+  this.stop = module.stop;
+};
