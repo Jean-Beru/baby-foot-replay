@@ -1,7 +1,9 @@
-FROM node:10-alpine
+FROM node:10-slim
 
-RUN apk add --update ffmpeg && \
-    rm -rf /var/cache/apk/*
+RUN apt-get update && \
+    apt-get install -y gpac && \
+    apt-get clean && \
+    rm -r /var/lib/apt/lists/*
 
 EXPOSE 80
 
