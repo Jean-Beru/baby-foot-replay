@@ -1,15 +1,14 @@
 const express = require('express');
 const serveStatic = require('serve-static');
-const videoStitch = require('video-stitch');
 const fs = require('fs');
 const bodyParser = require('body-parser');
 const http = require('http');
 const stream = require('./src/stream');
+const execSync = require('child_process').execSync;
 
 const SCHEME = 'http';
 const HOST = 'localhost';
-const PORT = 80;
-const DEBUG = process.NODE_ENV !== 'prod';
+const PORT = 8080;
 const PUBLIC_FOLDER = __dirname + '/public';
 const LIVE_FOLDER = '/video/live';
 const REPLAY_FOLDER = '/video/replay';
@@ -39,27 +38,24 @@ app.get('/', function(req, res) {
 // Replay
 app.get('/replay/:last', function(req, res) {
   const last = req.params.last;
-  const videos = fs.readdirSync(PUBLIC_FOLDER + LIVE_FOLDER);
-  const filename = 'video/replay/'+(new Date()).getTime()+'.mp4';
+  const videos = fs.readdirSync(PUBLIC_FOLDER + LIVE_FOLDER).filter(function (file) {
+      return file.match(/.*\.h264/ig);
+  });
+  const outputFile = 'video/replay/'+(new Date()).getTime()+'.mp4';
 
-  videoStitch
-    .concat({
-      silent: !DEBUG,
-      overwrite: true,
-    })
-    .clips(
-      videos
-        .slice(videos.length - last)
-        .map(function(file) {
-          return { fileName: `${PUBLIC_FOLDER + LIVE_FOLDER}/${file}` };
-        })
-    )
-    .output(PUBLIC_FOLDER + '/' + filename)
-    .concat()
-    .then(function() {
-      res.send(filename);
-    })
-  ;
+  try {
+    const command = 'MP4Box -add '+videos
+      .slice(videos.length - last)
+      .map(function(file) {
+        return `${PUBLIC_FOLDER + LIVE_FOLDER}/${file}`;
+      })
+      .join(' -cat ')+' '+PUBLIC_FOLDER+'/'+outputFile;
+    execSync(command);
+
+    res.send(outputFile);
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
 });
 
 // Save
