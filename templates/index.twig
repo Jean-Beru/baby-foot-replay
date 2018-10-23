@@ -22,13 +22,15 @@
             <div class="row">
                 {% for replay in replays %}
                     <div class="col-3">
-                        <div class="save">
-                            <div class="corner"></div>
-                            <div class="label">
-                                {{ replay.recordedAt|date('d M Y') }}<br />
-                                {{ replay.recordedAt|date('H:i') }}
+                        <a href="#" data-toggle="modal" data-target="#savedModal" data-backdrop="static" data-video="{{ replay.file }}">
+                            <div class="save">
+                                <div class="corner"></div>
+                                <div class="label">
+                                    {{ replay.recordedAt|date('d M Y') }}<br />
+                                    {{ replay.recordedAt|date('H:i') }}
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                 {% endfor %}
             </div>
@@ -37,7 +39,7 @@
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-body text-center">
-                            <video id="player" height="100%" controls></video>
+                            <video class="player" height="100%" controls data-plyr-config='{"keyboard": {"focused": true, "global": true}, "seekTime": .1}'></video>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
@@ -47,19 +49,27 @@
                 </div>
             </div>
 
+            <div class="modal fade" id="savedModal" tabindex="-1" role="dialog" aria-labelledby="savedModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-body text-center">
+                            <video class="player" height="100%" controls data-plyr-config='{"keyboard": {"focused": true, "global": true}}'></video>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <script>
                 $(function() {
-                    const player = new Plyr('#player', {
-                        keyboard: { focused: true, global: true },
-                        seekTime: .1,
-                    });
+                    const players = Plyr.setup('.player');
+                    const [replayer, savedPlayer] = players;
 
                     $('#save-replay').on('click', function () {
                         $.post({
                             url: '/save',
                             dataType: 'json',
                             data: {
-                                file: player.source
+                                file: replayer.source
                             }
                         }).done(function () {
                             $('#replayModal').find('.modal-body').prepend($('<div/>', {
@@ -76,18 +86,31 @@
 
                     $('#replayModal').on('show.bs.modal', function () {
                         $.get('/replay/5').done(function(result) {
-                            player.source = {
+                            replayer.source = {
                                 type: 'video',
                                 sources: [{
                                     src: result,
                                     type: 'video/mp4',
                                 }],
                             };
-                            player.play();
+                            replayer.play();
                         });
                     }).on('hide.bs.modal', function() {
-                        player.stop();
+                        replayer.stop();
                         $(this).find('.alert').remove();
+                    });
+
+                    $('#savedModal').on('show.bs.modal', function (e) {
+                        savedPlayer.source = {
+                            type: 'video',
+                            sources: [{
+                                src: $(e.relatedTarget).data('video'),
+                                type: 'video/mp4',
+                            }],
+                        };
+                        savedPlayer.play();
+                    }).on('hide.bs.modal', function() {
+                        savedPlayer.stop();
                     });
 
                     // Say hello to server
