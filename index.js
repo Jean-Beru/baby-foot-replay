@@ -69,7 +69,7 @@ app.post('/save', function(req, res) {
             return;
         }
 
-        res.status(204).json();
+        res.status(200).json({file: `${SAVE_FOLDER}/${filename}`, recordedAt: filename.split('.').slice(0, -1).join('.') / 1000});
     });
 });
 
