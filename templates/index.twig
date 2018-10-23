@@ -19,7 +19,7 @@
         </header>
 
         <div class="container-fluid">
-            <div class="row">
+            <div id="replays" class="row">
                 {% for replay in replays %}
                     <div class="col-3">
                         <a href="#" data-toggle="modal" data-target="#savedModal" data-backdrop="static" data-video="{{ replay.file }}">
@@ -55,6 +55,9 @@
                         <div class="modal-body text-center">
                             <video class="player" height="100%" controls data-plyr-config='{"keyboard": {"focused": true, "global": true}}'></video>
                         </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -71,11 +74,23 @@
                             data: {
                                 file: replayer.source
                             }
-                        }).done(function () {
+                        }).done(function (saved) {
                             $('#replayModal').find('.modal-body').prepend($('<div/>', {
                                 'class': 'alert alert-success',
                                 text: 'Replay sauvegardé !',
                             }));
+
+                            $('#replays').append(`<div class="col-3">
+                                <a href="#" data-toggle="modal" data-target="#savedModal" data-backdrop="static" data-video="${saved.file}">
+                                    <div class="save">
+                                        <div class="corner"></div>
+                                        <div class="label">
+                                            ${new Date(saved.recordedAt).toLocaleDateString()} <br>
+                                            ${new Date(saved.recordedAt).toLocaleTimeString()}
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>`);
                         }).fail(function (jqXHR) {
                             $('#replayModal').find('.modal-body').prepend($('<div/>', {
                                 'class': 'alert alert-danger',
